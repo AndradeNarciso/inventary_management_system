@@ -1,4 +1,4 @@
-package com.andrade.inventary_management_system_backend.domain;
+package com.andrade.inventary_management_system_backend.dto;
 
 import com.andrade.inventary_management_system_backend.enums.Role;
 
