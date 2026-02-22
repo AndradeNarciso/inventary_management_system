@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.andrade.inventary_management_system_backend.dto.Response;
+import com.andrade.inventary_management_system_backend.exception.HeaderNotFoundException;
 import com.andrade.inventary_management_system_backend.exception.InvalidCredentialException;
 import com.andrade.inventary_management_system_backend.exception.NameValueRequiredException;
 import com.andrade.inventary_management_system_backend.exception.NotFoundException;
@@ -56,5 +57,15 @@ public class GlobalHandlerException {
         return new ResponseEntity<>(responseNameValueRequiredException, HttpStatus.BAD_REQUEST);
     }
 
-}
+    @ExceptionHandler(HeaderNotFoundException.class)
+    public ResponseEntity<Response> handlerHeaderNotFoundException(HeaderNotFoundException ex) {
+        Response responseHeaderNotFoundException = Response
+                .builder()
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .message(ex.getMessage())
+                .build();
 
+        return new ResponseEntity<>(responseHeaderNotFoundException, HttpStatus.UNAUTHORIZED);
+    }
+
+}
