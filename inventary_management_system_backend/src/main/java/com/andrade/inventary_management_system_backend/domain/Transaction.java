@@ -5,8 +5,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import org.springframework.transaction.TransactionStatus;
-
+import com.andrade.inventary_management_system_backend.enums.TransactionStatus;
 import com.andrade.inventary_management_system_backend.enums.TransactionType;
 
 import jakarta.persistence.Column;
