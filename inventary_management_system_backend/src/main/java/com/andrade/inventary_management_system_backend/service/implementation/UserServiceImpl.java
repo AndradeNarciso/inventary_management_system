@@ -160,8 +160,15 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User was not found"));
         UserDto userDto = modelMapper.map(user, UserDto.class);
 
+        userDto.getTransactions().forEach(transactionDto -> {
+            transactionDto.setSupplier(null);
+            transactionDto.setUser(null);
+        });
+
         return Response.builder()
-                .transactionDtos(userDto.getTransactions())
+                .status(HttpStatus.OK.value())
+                .message("sucess")
+                .user(userDto)
                 .build();
     }
 
