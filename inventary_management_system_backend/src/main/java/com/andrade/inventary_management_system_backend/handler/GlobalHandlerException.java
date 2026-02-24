@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.andrade.inventary_management_system_backend.dto.Response;
 import com.andrade.inventary_management_system_backend.exception.HeaderNotFoundException;
 import com.andrade.inventary_management_system_backend.exception.InvalidCredentialException;
+import com.andrade.inventary_management_system_backend.exception.InvalidMonthException;
 import com.andrade.inventary_management_system_backend.exception.NameValueRequiredException;
 import com.andrade.inventary_management_system_backend.exception.NotFoundException;
 
@@ -66,6 +67,17 @@ public class GlobalHandlerException {
                 .build();
 
         return new ResponseEntity<>(responseHeaderNotFoundException, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(InvalidMonthException.class)
+    public ResponseEntity<Response> handlerInvalidMonthException(InvalidMonthException ex) {
+        Response responseHeaderInvalidMonthException = Response
+                .builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message(ex.getMessage())
+                .build();
+
+        return new ResponseEntity<>(responseHeaderInvalidMonthException, HttpStatus.BAD_REQUEST);
     }
 
 }
