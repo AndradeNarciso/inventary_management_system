@@ -32,7 +32,7 @@ public class JwtUtil {
         this.key = new SecretKeySpec(bytes, "HmacSHA256");
     }
 
-    public String encoder(String email) {
+    public String generateToken(String email) {
         return Jwts.builder()
                 .subject(email)
                 .issuedAt(new Date(System.currentTimeMillis()))

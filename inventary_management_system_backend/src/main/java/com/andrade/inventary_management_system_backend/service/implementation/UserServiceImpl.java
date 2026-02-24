@@ -13,6 +13,8 @@ import com.andrade.inventary_management_system_backend.dto.RegisterRequest;
 import com.andrade.inventary_management_system_backend.dto.Response;
 import com.andrade.inventary_management_system_backend.dto.UserDto;
 import com.andrade.inventary_management_system_backend.enums.Role;
+import com.andrade.inventary_management_system_backend.exception.InvalidCredentialException;
+import com.andrade.inventary_management_system_backend.exception.NotFoundException;
 import com.andrade.inventary_management_system_backend.exception.RequiredRoleException;
 import com.andrade.inventary_management_system_backend.repository.UserRepository;
 import com.andrade.inventary_management_system_backend.security.JwtUtil;
@@ -61,14 +63,25 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Response login(LoginRequest loginRequest) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'login'");
+
+        User loggedUser = userRepository.findByEmail(loginRequest.email())
+                .orElseThrow(() -> new NotFoundException("User was not found"));
+
+        if (!passwordEncoder.matches(loginRequest.password(), loggedUser.getPassword())) {
+            throw new InvalidCredentialException("Invalid Passwords");
+        }
+        String token = jwtUtil.generateToken(loggedUser.getEmail());
+        return Response.builder()
+                .token(token)
+                .message("User logged in")
+                .role(loggedUser.getRole())
+                .expirationTime("5h")
+                .build();
     }
 
     @Override
     public Response getAll() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAll'");
+        return Response.builder().user(userRepository.findAll()).build();
     }
 
     @Override
