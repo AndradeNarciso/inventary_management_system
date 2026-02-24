@@ -86,7 +86,10 @@ public class UserServiceImpl implements UserService {
         List<User> users = userRepository.findAll();
         List<UserDto> userDtos = modelMapper.map(users, new TypeToken<List<UserDto>>() {
         }.getType());
-        return Response.builder().users(userDtos).build();
+        return Response.builder()
+                .status(HttpStatus.OK.value())
+                .message("Sucess")
+                .users(userDtos).build();
     }
 
     @Override
@@ -103,8 +106,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Response deleteUser(UUID id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deleteUser'");
+        if (!userRepository.existsById(id)) {
+            throw new NotFoundException("User do not exists");
+        }
+        userRepository.deleteById(id);
+        return Response.builder()
+                .status(HttpStatus.OK.value())
+                .message("User deleted")
+                .build();
     }
 
     @Override
