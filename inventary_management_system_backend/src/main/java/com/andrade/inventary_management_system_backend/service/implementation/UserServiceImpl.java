@@ -1,8 +1,10 @@
 package com.andrade.inventary_management_system_backend.service.implementation;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -81,7 +83,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Response getAll() {
-        return Response.builder().user(userRepository.findAll()).build();
+        List<User> users = userRepository.findAll();
+        List<UserDto> userDtos = modelMapper.map(users, new TypeToken<List<UserDto>>() {
+        }.getType());
+        return Response.builder().users(userDtos).build();
     }
 
     @Override
