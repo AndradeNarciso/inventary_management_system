@@ -96,14 +96,51 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Response getUserById(UUID id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getUserById'");
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User was not found"));
+
+        return Response.builder()
+                .status(HttpStatus.OK.value())
+                .user(modelMapper.map(user, UserDto.class))
+                .build();
     }
 
     @Override
-    public Response updateUser(UUID id, UserDto user) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateUser'");
+    public Response updateUser(UUID id, UserDto userDto) {
+
+        User savedUser = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User was not found"));
+
+        if (userDto.getName() != null) {
+            savedUser.setName(userDto.getName());
+        }
+        if (userDto.getEmail() != null) {
+            savedUser.setEmail(userDto.getEmail());
+        }
+        if (userDto.getPhoneNumber() != null) {
+            savedUser.setPhoneNumber(userDto.getPhoneNumber());
+        }
+        if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
+            savedUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        }
+
+        try {
+            if (userDto.getRole() != null) {
+                Role role = Role.valueOf(userDto.getRole().name());
+                savedUser.setRole(role);
+            }
+
+        } catch (Exception e) {
+            throw new RequiredRoleException("Invalid Role");
+        }
+
+        userRepository.save(savedUser);
+
+        return Response.builder()
+                .status(HttpStatus.OK.value())
+                .message("User sucessfuly updated")
+                .build();
+
     }
 
     @Override
@@ -120,8 +157,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Response getUserTransaction(UUID id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getUserTransaction'");
+        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User was not found"));
+        UserDto userDto = modelMapper.map(user, UserDto.class);
+
+        return Response.builder()
+                .transactionDtos(userDto.getTransactions())
+                .build();
     }
 
     @Override
