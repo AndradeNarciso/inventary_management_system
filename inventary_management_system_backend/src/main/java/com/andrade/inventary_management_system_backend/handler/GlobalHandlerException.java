@@ -9,6 +9,7 @@ import com.andrade.inventary_management_system_backend.dto.Response;
 import com.andrade.inventary_management_system_backend.exception.HeaderNotFoundException;
 import com.andrade.inventary_management_system_backend.exception.InvalidCredentialException;
 import com.andrade.inventary_management_system_backend.exception.InvalidMonthException;
+import com.andrade.inventary_management_system_backend.exception.RequiredRoleException;
 import com.andrade.inventary_management_system_backend.exception.NameValueRequiredException;
 import com.andrade.inventary_management_system_backend.exception.NotFoundException;
 
@@ -78,6 +79,17 @@ public class GlobalHandlerException {
                 .build();
 
         return new ResponseEntity<>(responseHeaderInvalidMonthException, HttpStatus.BAD_REQUEST);
+    }
+
+      @ExceptionHandler(RequiredRoleException.class)
+    public ResponseEntity<Response> handlerRequiredRoleException(RequiredRoleException ex) {
+        Response responseHeaderInvalidRoleException = Response
+                .builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message(ex.getMessage())
+                .build();
+
+        return new ResponseEntity<>(responseHeaderInvalidRoleException, HttpStatus.BAD_REQUEST);
     }
 
 }
