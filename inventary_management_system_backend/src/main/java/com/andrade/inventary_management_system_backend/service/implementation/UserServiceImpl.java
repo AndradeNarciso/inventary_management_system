@@ -24,6 +24,7 @@ import com.andrade.inventary_management_system_backend.repository.UserRepository
 import com.andrade.inventary_management_system_backend.security.JwtUtil;
 import com.andrade.inventary_management_system_backend.service.UserService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,25 +39,25 @@ public class UserServiceImpl implements UserService {
     private final JwtUtil jwtUtil;
 
     @Override
+    @Transactional(rollbackOn = Exception.class)
     public Response register(RegisterRequest registerRequest) {
 
-        if (registerRequest.role() == null) {
-            throw new RequiredRoleException("Role required");
-        }
-
         try {
+
             Role role = Role.valueOf(registerRequest.role().name());
             User user = User.builder()
                     .name(registerRequest.name())
                     .email(registerRequest.email())
                     .password(passwordEncoder.encode(registerRequest.password()))
+                    .phoneNumber(registerRequest.phoneNumber())
                     .role(role)
                     .build();
 
             userRepository.save(user);
         } catch (Exception e) {
-            throw new RequiredRoleException("Invalid Role");
+            throw new RuntimeException("Bad Request");
         }
+
         log.info("New user added");
         return Response.builder()
                 .status(HttpStatus.OK.value())

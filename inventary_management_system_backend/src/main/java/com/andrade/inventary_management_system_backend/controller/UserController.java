@@ -18,6 +18,7 @@ import com.andrade.inventary_management_system_backend.dto.Response;
 import com.andrade.inventary_management_system_backend.dto.UserDto;
 import com.andrade.inventary_management_system_backend.service.implementation.UserServiceImpl;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -44,14 +45,14 @@ public class UserController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<Response> updateUser(@PathVariable("id") UUID userId, @RequestBody UserDto userDto) {
+    public ResponseEntity<Response> updateUser(@PathVariable("id") UUID userId, @Valid @RequestBody UserDto userDto) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(userService.updateUser(userId, userDto));
 
     }
 
-    @GetMapping("/current-user}")
+    @GetMapping("/current-user")
     public ResponseEntity<User> getCurrentUser() {
         return ResponseEntity
                 .status(HttpStatus.OK)

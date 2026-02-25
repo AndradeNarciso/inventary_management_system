@@ -12,6 +12,7 @@ import com.andrade.inventary_management_system_backend.dto.RegisterRequest;
 import com.andrade.inventary_management_system_backend.dto.Response;
 import com.andrade.inventary_management_system_backend.service.implementation.UserServiceImpl;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -22,14 +23,14 @@ public class AuthController {
     private final UserServiceImpl userService;
 
     @PostMapping("/register")
-    public ResponseEntity<Response> registerUser(@RequestBody RegisterRequest register) {
+    public ResponseEntity<Response> registerUser(@Valid @RequestBody RegisterRequest register) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(userService.register(register));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Response> loginUser(@RequestBody LoginRequest login) {
+    public ResponseEntity<Response> loginUser(@Valid @RequestBody LoginRequest login) {
         return ResponseEntity
         .status(HttpStatus.OK)
         .body(userService.login(login));

@@ -48,6 +48,7 @@ public class AuthFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             log.info("Exception at AuthFilter");
+
         }
 
         filterChain.doFilter(request, response);

@@ -6,8 +6,7 @@ import java.util.List;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Positive;
+
 
 import org.springframework.data.jpa.domain.Specification;
 
@@ -128,7 +127,7 @@ public class TransactionFilter {
                         return criterialBuilder.and(monthPredicate,yearPredicate);
 
 
-                }
+                };
         }
 
 }

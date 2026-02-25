@@ -40,7 +40,7 @@ public class SecurityConfig {
                         .accessDeniedHandler(customAcessDeniedHandler)
                         .authenticationEntryPoint(customAuthenticationEntryPointHandler))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

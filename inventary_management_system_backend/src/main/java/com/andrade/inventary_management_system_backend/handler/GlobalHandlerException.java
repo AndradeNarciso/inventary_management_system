@@ -2,6 +2,8 @@ package com.andrade.inventary_management_system_backend.handler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -81,15 +83,27 @@ public class GlobalHandlerException {
         return new ResponseEntity<>(responseHeaderInvalidMonthException, HttpStatus.BAD_REQUEST);
     }
 
-      @ExceptionHandler(RequiredRoleException.class)
-    public ResponseEntity<Response> handlerRequiredRoleException(RequiredRoleException ex) {
-        Response responseHeaderInvalidRoleException = Response
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Response> handlerMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        Response responseMethodArgumentNotValidException = Response
                 .builder()
                 .status(HttpStatus.BAD_REQUEST.value())
-                .message(ex.getMessage())
+                .message("There is Field required")
                 .build();
 
-        return new ResponseEntity<>(responseHeaderInvalidRoleException, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(responseMethodArgumentNotValidException, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Response> handlerHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        Response responseHttpMessageNotReadableException = Response
+                .builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message("Invalid input format. Check the fields sent")
+                .build();
+
+        return new ResponseEntity<>(responseHttpMessageNotReadableException, HttpStatus.BAD_REQUEST);
+    }
 }
+
+// HttpMessageNotReadableException
