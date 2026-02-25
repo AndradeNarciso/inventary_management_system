@@ -11,7 +11,6 @@ import com.andrade.inventary_management_system_backend.dto.Response;
 import com.andrade.inventary_management_system_backend.exception.HeaderNotFoundException;
 import com.andrade.inventary_management_system_backend.exception.InvalidCredentialException;
 import com.andrade.inventary_management_system_backend.exception.InvalidMonthException;
-import com.andrade.inventary_management_system_backend.exception.RequiredRoleException;
 import com.andrade.inventary_management_system_backend.exception.NameValueRequiredException;
 import com.andrade.inventary_management_system_backend.exception.NotFoundException;
 

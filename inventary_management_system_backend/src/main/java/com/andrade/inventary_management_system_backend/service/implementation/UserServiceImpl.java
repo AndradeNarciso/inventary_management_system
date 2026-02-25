@@ -19,7 +19,6 @@ import com.andrade.inventary_management_system_backend.dto.UserDto;
 import com.andrade.inventary_management_system_backend.enums.Role;
 import com.andrade.inventary_management_system_backend.exception.InvalidCredentialException;
 import com.andrade.inventary_management_system_backend.exception.NotFoundException;
-import com.andrade.inventary_management_system_backend.exception.RequiredRoleException;
 import com.andrade.inventary_management_system_backend.repository.UserRepository;
 import com.andrade.inventary_management_system_backend.security.JwtUtil;
 import com.andrade.inventary_management_system_backend.service.UserService;
@@ -125,15 +124,8 @@ public class UserServiceImpl implements UserService {
             savedUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
         }
 
-        try {
-            if (userDto.getRole() != null) {
-                Role role = Role.valueOf(userDto.getRole().name());
-                savedUser.setRole(role);
-            }
-
-        } catch (Exception e) {
-            throw new RequiredRoleException("Invalid Role");
-        }
+        Role role = Role.valueOf(userDto.getRole().name());
+        savedUser.setRole(role);
 
         userRepository.save(savedUser);
 
