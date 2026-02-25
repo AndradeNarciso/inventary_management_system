@@ -27,14 +27,14 @@ public class UserDto {
 
     private String email;
 
-    @JsonIgnore
     private String password;
 
     private Role role;
 
     private String phoneNumber;
 
-    private  Instant createdAt;
+    @JsonIgnore
+    private Instant createdAt;
 
     private List<TransactionDto> transactions;
 
