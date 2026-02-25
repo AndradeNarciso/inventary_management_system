@@ -4,13 +4,13 @@ import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.andrade.inventary_management_system_backend.domain.Category;
 import com.andrade.inventary_management_system_backend.dto.CategoryDto;
 import com.andrade.inventary_management_system_backend.dto.Response;
-import com.andrade.inventary_management_system_backend.dto.UserDto;
 import com.andrade.inventary_management_system_backend.exception.NotFoundException;
 import com.andrade.inventary_management_system_backend.repository.CategoryRepository;
 import com.andrade.inventary_management_system_backend.service.CategoryService;
@@ -32,7 +32,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         return Response.builder()
                 .status(HttpStatus.OK.value())
-                .message("Category saved")
+                .message("Category saved sucessfully")
                 .build();
 
     }
@@ -40,7 +40,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Response getAll() {
 
-        List<Category> users = categoryRepository.findAll();
+        List<Category> users = categoryRepository.findAll(Sort.by(Sort.Direction.DESC ));
         List<CategoryDto> categoryDtos = modelMapper.map(users, new TypeToken<List<CategoryDto>>() {
         }.getType());
 
