@@ -25,7 +25,6 @@ public class CategoryDto {
     @NotBlank
     private String name;
 
-    @NotBlank
     private List<Product> product;
 
 }

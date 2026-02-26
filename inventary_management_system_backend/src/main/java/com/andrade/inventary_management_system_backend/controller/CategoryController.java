@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/category")
+@RequestMapping("api/v1/categories")
 
 public class CategoryController {
 
