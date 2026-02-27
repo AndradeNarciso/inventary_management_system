@@ -28,7 +28,7 @@ public class Supplier {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "supplier_name")
+    @Column(name = "supplier_name", unique = true)
     private String name;
 
     @Column(name = "contact_information", nullable = false)
