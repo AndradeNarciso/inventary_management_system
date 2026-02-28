@@ -1,5 +1,7 @@
 package com.andrade.inventary_management_system_backend.handler;
 
+import org.springframework.security.access.AccessDeniedException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -19,6 +21,7 @@ import com.andrade.inventary_management_system_backend.exception.NotFoundExcepti
 public class GlobalHandlerException {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Response> handlerGlobalException(Exception ex) {
+
         Response responseExeception = Response
                 .builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
@@ -114,5 +117,15 @@ public class GlobalHandlerException {
                 .build();
 
         return new ResponseEntity<>(responseDuplicatedValueException, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Response> handleAccessDeniedException(AccessDeniedException ex) {
+        Response responseAccessDeniedException = Response.builder()
+                .status(HttpStatus.FORBIDDEN.value())
+                .message(ex.getMessage())
+                .build();
+
+        return new ResponseEntity<>(responseAccessDeniedException, HttpStatus.FORBIDDEN);
     }
 }
