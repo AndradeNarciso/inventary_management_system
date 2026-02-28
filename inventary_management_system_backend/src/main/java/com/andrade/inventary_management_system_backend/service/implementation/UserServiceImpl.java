@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 @Slf4j
 public class UserServiceImpl implements UserService {
 
@@ -38,7 +39,7 @@ public class UserServiceImpl implements UserService {
     private final JwtUtil jwtUtil;
 
     @Override
-    @Transactional(rollbackOn = Exception.class)
+    
     public Response register(RegisterRequest registerRequest) {
 
         try {

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.andrade.inventary_management_system_backend.dto.Response;
+import com.andrade.inventary_management_system_backend.exception.DuplicatedValueException;
 import com.andrade.inventary_management_system_backend.exception.HeaderNotFoundException;
 import com.andrade.inventary_management_system_backend.exception.InvalidCredentialException;
 import com.andrade.inventary_management_system_backend.exception.InvalidMonthException;
@@ -103,6 +104,15 @@ public class GlobalHandlerException {
 
         return new ResponseEntity<>(responseHttpMessageNotReadableException, HttpStatus.BAD_REQUEST);
     }
-}
 
-// HttpMessageNotReadableException
+    @ExceptionHandler(DuplicatedValueException.class)
+    public ResponseEntity<Response> handlerDuplicatedValueException(DuplicatedValueException ex) {
+        Response responseDuplicatedValueException = Response
+                .builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message(ex.getMessage())
+                .build();
+
+        return new ResponseEntity<>(responseDuplicatedValueException, HttpStatus.BAD_REQUEST);
+    }
+}

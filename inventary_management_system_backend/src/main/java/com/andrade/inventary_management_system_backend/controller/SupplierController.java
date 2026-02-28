@@ -23,13 +23,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/suplliers")
+@RequestMapping("api/v1/suplliers")
 @RequiredArgsConstructor
 public class SupplierController {
 
     private final SupplierServiceImpl supplierService;
 
     @GetMapping("/all")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> getAllSupplier() {
         return ResponseEntity
                 .status(HttpStatus.OK)

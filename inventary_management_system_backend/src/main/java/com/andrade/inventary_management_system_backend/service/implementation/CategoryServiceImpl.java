@@ -15,10 +15,12 @@ import com.andrade.inventary_management_system_backend.exception.NotFoundExcepti
 import com.andrade.inventary_management_system_backend.repository.CategoryRepository;
 import com.andrade.inventary_management_system_backend.service.CategoryService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CategoryServiceImpl implements CategoryService {
         private final CategoryRepository categoryRepository;
         private final ModelMapper modelMapper;

@@ -5,21 +5,24 @@ import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.andrade.inventary_management_system_backend.domain.Supplier;
 import com.andrade.inventary_management_system_backend.dto.SupplierDto;
+import com.andrade.inventary_management_system_backend.dto.SupplierUpdateDto;
 import com.andrade.inventary_management_system_backend.dto.Response;
+import com.andrade.inventary_management_system_backend.exception.DuplicatedValueException;
 import com.andrade.inventary_management_system_backend.exception.NotFoundException;
 import com.andrade.inventary_management_system_backend.repository.SupplierRepository;
 import com.andrade.inventary_management_system_backend.service.SupplierService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class SupplierServiceImpl implements SupplierService {
 
         private final SupplierRepository supplierRepository;
@@ -44,14 +47,14 @@ public class SupplierServiceImpl implements SupplierService {
 
         @Override
         public Response getAll() {
-                List<Supplier> users = supplierRepository.findAll(Sort.by(Sort.Direction.DESC));
-                List<SupplierDto> SupplierDtos = modelMapper.map(users, new TypeToken<List<SupplierDto>>() {
+                List<Supplier> supplier = supplierRepository.findAll();
+                List<SupplierDto> supplierDtos = modelMapper.map(supplier, new TypeToken<List<SupplierDto>>() {
                 }.getType());
 
                 return Response.builder()
                                 .status(HttpStatus.OK.value())
                                 .message("Sucess")
-                                .supplierDtos(SupplierDtos).build();
+                                .supplierDtos(supplierDtos).build();
         }
 
         @Override
@@ -66,20 +69,24 @@ public class SupplierServiceImpl implements SupplierService {
         }
 
         @Override
-        public Response updateSupplier(UUID id, SupplierDto supplierDto) {
+        public Response updateSupplier(UUID id, SupplierUpdateDto supplierDto) {
                 Supplier savedSupplier = supplierRepository.findById(id)
                                 .orElseThrow(() -> new NotFoundException("Supplier not found"));
 
-                if (supplierDto.getAdress() != null) {
-                        savedSupplier.setAdress(supplierDto.getAdress());
+                if (supplierDto.adress() != null) {
+                        savedSupplier.setAdress(supplierDto.adress());
                 }
 
-                if (supplierDto.getName() != null) {
-                        savedSupplier.setName(supplierDto.getName());
+                if (supplierDto.name() != null) {
+                        savedSupplier.setName(supplierDto.name());
                 }
 
-                if (supplierDto.getName() != null) {
-                        savedSupplier.setName(supplierDto.getName());
+                if(savedSupplier.getName().equals(supplierDto.name())){
+                        throw new DuplicatedValueException("Supplier's alredy exists");
+                }
+
+                if (supplierDto.contactInfo() != null ) {
+                        savedSupplier.setContactInfo(supplierDto.contactInfo());
                 }
 
                 return Response.builder()
@@ -100,6 +107,12 @@ public class SupplierServiceImpl implements SupplierService {
                                 .message("Supplier deleted")
                                 .build();
 
+        }
+
+        @Override
+        public Response updateSupplier(UUID id, SupplierDto suppliCategoryDto) {
+                // TODO Auto-generated method stub
+                throw new UnsupportedOperationException("Unimplemented method 'updateSupplier'");
         }
 
 }

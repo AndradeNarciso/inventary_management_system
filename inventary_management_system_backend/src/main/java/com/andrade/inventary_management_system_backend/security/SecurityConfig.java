@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SecurityConfig {
 
     private final AuthFilter authFilter;
-    private CustomAuthenticationEntryPointHandler customAuthenticationEntryPointHandler;
+    private final CustomAuthenticationEntryPointHandler customAuthenticationEntryPointHandler;
     private final CustomAcessDeniedHandler customAcessDeniedHandler;
 
     @Bean
