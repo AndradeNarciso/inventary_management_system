@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.andrade.inventary_management_system_backend.exception.HeaderNotFoundException;
+import com.andrade.inventary_management_system_backend.exception.EmptyResourceException;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -60,7 +60,7 @@ public class AuthFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
 
         if (!StringUtils.hasText(header)) {
-            throw new HeaderNotFoundException("Authorization header not found");
+            throw new EmptyResourceException("Authorization header not found");
         }
         if (!header.startsWith("Bearer ")) {
             throw new IllegalArgumentException("Invalid Authorization header format");

@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Transactional
 public class CategoryServiceImpl implements CategoryService {
+        
         private final CategoryRepository categoryRepository;
         private final ModelMapper modelMapper;
 
@@ -33,7 +34,7 @@ public class CategoryServiceImpl implements CategoryService {
                 categoryRepository.save(category);
 
                 return Response.builder()
-                                .status(HttpStatus.OK.value())
+                                .status(HttpStatus.CREATED.value())
                                 .message("Category saved sucessfully")
                                 .build();
 

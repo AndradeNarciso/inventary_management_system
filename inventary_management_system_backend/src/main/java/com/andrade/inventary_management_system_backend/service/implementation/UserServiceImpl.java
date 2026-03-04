@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
 
         log.info("New user added");
         return Response.builder()
-                .status(HttpStatus.OK.value())
+                .status(HttpStatus.CREATED.value())
                 .message("User sucessfuly registered")
                 .build();
 

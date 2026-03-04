@@ -39,7 +39,7 @@ public class SupplierServiceImpl implements SupplierService {
                 supplierRepository.save(supplier);
 
                 return Response.builder()
-                                .status(HttpStatus.OK.value())
+                                .status(HttpStatus.CREATED.value())
                                 .message("Supplier saved sucessfully")
                                 .build();
 
