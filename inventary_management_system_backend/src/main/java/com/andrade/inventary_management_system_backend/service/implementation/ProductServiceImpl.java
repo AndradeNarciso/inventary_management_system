@@ -27,12 +27,12 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ModelMapper modelMapper;
     private final CategoryRepository categoryRepository;
-   // private final SupplierRepository supplierRepository;
+    // private final SupplierRepository supplierRepository;
 
     private static final String DIRECTORY_IMAGE = System.getProperty("user.dir") + "/product-image/";
 
     @Override
-    public Response createProduct(ProductDto productDto,MultipartFile image) {
+    public Response createProduct(ProductDto productDto, MultipartFile image) {
 
         Category categoryProduct = categoryRepository.findById(productDto.getIdCategory())
                 .orElseThrow(() -> new NotFoundException("Undefined category"));
@@ -46,10 +46,9 @@ public class ProductServiceImpl implements ProductService {
                 .category(categoryProduct)
                 .build();
 
-
-         if(image==null || image.isEmpty()){
+        if (image == null || image.isEmpty()) {
             throw new EmptyResourceException("Image undefined");
-         }       
+        }
         productRepository.save(product);
 
         productRepository.save(product);
