@@ -93,7 +93,7 @@ public class CategoryServiceImpl implements CategoryService {
                 categoryRepository.deleteById(id);
 
                 return Response.builder().status(HttpStatus.OK.value())
-                                .message("Category deleteda")
+                                .message("Category deleted")
                                 .build();
 
         }

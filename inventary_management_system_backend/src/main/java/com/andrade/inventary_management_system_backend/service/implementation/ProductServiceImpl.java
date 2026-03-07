@@ -1,10 +1,12 @@
 package com.andrade.inventary_management_system_backend.service.implementation;
 
 import java.io.File;
-import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,7 +20,6 @@ import com.andrade.inventary_management_system_backend.exception.EmptyResourceEx
 import com.andrade.inventary_management_system_backend.exception.NotFoundException;
 import com.andrade.inventary_management_system_backend.repository.CategoryRepository;
 import com.andrade.inventary_management_system_backend.repository.ProductRepository;
-import com.andrade.inventary_management_system_backend.repository.SupplierRepository;
 import com.andrade.inventary_management_system_backend.service.ProductService;
 
 import jakarta.transaction.Transactional;
@@ -35,7 +36,6 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ModelMapper modelMapper;
     private final CategoryRepository categoryRepository;
-    // private final SupplierRepository supplierRepository;
 
     private static final String DIRECTORY_IMAGE = System.getProperty("user.dir") + "/product-image/";
     private final Integer imagaMaxSize = 10 * 1024 * 1024;
@@ -70,33 +70,100 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Response updateProduct(Long id, ProductDto productDto) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateProduct'");
+    public Response updateProduct(ProductDto productDto, MultipartFile image) {
+        Product product = productRepository.findById(productDto.getId())
+                .orElseThrow(() -> new NotFoundException("Producto was not found"));
+
+        if (image != null && !image.isEmpty()) {
+            String newImagePath = saveImage(image);
+            product.setImageUrl(newImagePath);
+        }
+
+        if (productDto.getIdCategory() != null && productDto.getIdCategory() > 0) {
+
+            Category newCategory = categoryRepository.findById(productDto.getIdCategory())
+                    .orElseThrow(() -> new NotFoundException("Category was not found"));
+
+            product.setCategory(newCategory);
+        }
+
+        if (productDto.getDescription() != null && !productDto.getDescription().isBlank()) {
+            product.setDescription(productDto.getDescription());
+        }
+
+        if (productDto.getName() != null && !productDto.getName().isBlank()) {
+            product.setName(productDto.getName());
+        }
+
+        if (productDto.getSku() != null && !productDto.getSku().isBlank()) {
+            product.setSku(productDto.getSku());
+        }
+
+        if (productDto.getPrice() != null && productDto.getPrice().compareTo(BigDecimal.ZERO) >= 0) {
+            product.setSku(productDto.getSku());
+        }
+
+        if (productDto.getQuantStock() != null && productDto.getQuantStock() >= 0) {
+            product.setQuantStock(productDto.getQuantStock());
+        }
+
+        productRepository.save(product);
+
+        return Response.builder()
+                .status(HttpStatus.OK.value())
+                .message("Product updated sucessfully")
+                .build();
     }
 
     @Override
     public Response getAll() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAll'");
+
+        List<Product> products = productRepository.findAll();
+        List<ProductDto> productDtos = modelMapper.map(products, new TypeToken<List<ProductDto>>() {
+        }.getType());
+
+        return Response.builder()
+                .status(HttpStatus.CREATED.value())
+                .productDtos(productDtos)
+                .build();
     }
 
     @Override
     public Response getProductById(Long id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getProductById'");
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Product was not found"));
+
+        return Response.builder()
+                .status(HttpStatus.OK.value())
+                .productDto(modelMapper.map(product, ProductDto.class))
+                .build();
     }
 
     @Override
-    public Response delteById(Long id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'delteById'");
+    public Response deleteById(Long id) {
+        if (!productRepository.existsById(id)) {
+            throw new NotFoundException("Product do not exists");
+        }
+        categoryRepository.deleteById(id);
+
+        return Response.builder().status(HttpStatus.OK.value())
+                .message("Product deleted")
+                .build();
+
     }
 
     @Override
     public Response searchProduct(String value) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'searchProduct'");
+
+        List<Product> products = productRepository.findByNameContainingOrDescriptionContaining(value, value);
+        List<ProductDto> productDtos = modelMapper.map(products, new TypeToken<List<ProductDto>>() {
+        }.getType());
+
+        return Response.builder()
+                .status(HttpStatus.OK.value())
+                .productDtos(productDtos)
+                .build();
+
     }
 
     private String saveImage(MultipartFile image) {

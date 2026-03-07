@@ -9,13 +9,13 @@ public interface ProductService {
 
     Response createProduct(ProductDto productDto, MultipartFile image);
 
-    Response updateProduct(Long id, ProductDto productDto);
+    Response updateProduct(ProductDto productDto, MultipartFile file);
 
     Response getAll();
 
     Response getProductById(Long id);
 
-    Response delteById(Long id);
+    Response deleteById(Long id);
 
     Response searchProduct(String value);
 }
