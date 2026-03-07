@@ -156,6 +156,10 @@ public class ProductServiceImpl implements ProductService {
     public Response searchProduct(String value) {
 
         List<Product> products = productRepository.findByNameContainingOrDescriptionContaining(value, value);
+
+        if (products.isEmpty()) {
+            throw new NotFoundException("None product was found");
+        }
         List<ProductDto> productDtos = modelMapper.map(products, new TypeToken<List<ProductDto>>() {
         }.getType());
 
