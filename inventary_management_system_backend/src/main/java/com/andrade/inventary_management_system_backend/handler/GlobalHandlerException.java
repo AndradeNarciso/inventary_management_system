@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.andrade.inventary_management_system_backend.dto.Response;
 import com.andrade.inventary_management_system_backend.exception.DuplicatedValueException;
 import com.andrade.inventary_management_system_backend.exception.EmptyResourceException;
+import com.andrade.inventary_management_system_backend.exception.HeaderNotFoundException;
 import com.andrade.inventary_management_system_backend.exception.InvalidCredentialException;
 import com.andrade.inventary_management_system_backend.exception.InvalidMonthException;
 import com.andrade.inventary_management_system_backend.exception.NameValueRequiredException;
@@ -64,8 +65,8 @@ public class GlobalHandlerException {
         return new ResponseEntity<>(responseNameValueRequiredException, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(EmptyResourceException.class)
-    public ResponseEntity<Response> handlerHeaderNotFoundException(EmptyResourceException ex) {
+    @ExceptionHandler(HeaderNotFoundException.class)
+    public ResponseEntity<Response> handlerHeaderNotFoundException(HeaderNotFoundException ex) {
         Response responseHeaderNotFoundException = Response
                 .builder()
                 .status(HttpStatus.UNAUTHORIZED.value())
@@ -129,7 +130,7 @@ public class GlobalHandlerException {
         return new ResponseEntity<>(responseAccessDeniedException, HttpStatus.FORBIDDEN);
     }
 
-       @ExceptionHandler(EmptyResourceException.class)
+    @ExceptionHandler(EmptyResourceException.class)
     public ResponseEntity<Response> handleEmptyResourceException(EmptyResourceException ex) {
         Response responseEmptyResourceException = Response.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
@@ -139,6 +140,3 @@ public class GlobalHandlerException {
         return new ResponseEntity<>(responseEmptyResourceException, HttpStatus.BAD_REQUEST);
     }
 }
-
-
-

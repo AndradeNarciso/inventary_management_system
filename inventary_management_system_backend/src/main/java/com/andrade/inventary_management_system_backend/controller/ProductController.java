@@ -21,7 +21,7 @@ import com.andrade.inventary_management_system_backend.service.implementation.Pr
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("api/v1/product")
+@RequestMapping("api/v1/products")
 @RequiredArgsConstructor
 public class ProductController {
 
