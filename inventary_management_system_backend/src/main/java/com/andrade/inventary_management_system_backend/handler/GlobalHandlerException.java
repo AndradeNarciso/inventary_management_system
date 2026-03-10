@@ -17,6 +17,7 @@ import com.andrade.inventary_management_system_backend.exception.InvalidCredenti
 import com.andrade.inventary_management_system_backend.exception.InvalidMonthException;
 import com.andrade.inventary_management_system_backend.exception.NameValueRequiredException;
 import com.andrade.inventary_management_system_backend.exception.NotFoundException;
+import com.andrade.inventary_management_system_backend.exception.SerializationException;
 
 @ControllerAdvice
 public class GlobalHandlerException {
@@ -138,5 +139,15 @@ public class GlobalHandlerException {
                 .build();
 
         return new ResponseEntity<>(responseEmptyResourceException, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(SerializationException.class)
+    public ResponseEntity<Response> handleSerializationException(SerializationException ex) {
+        Response responseSerializationException = Response.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message(ex.getMessage())
+                .build();
+
+        return new ResponseEntity<>(responseSerializationException, HttpStatus.BAD_REQUEST);
     }
 }

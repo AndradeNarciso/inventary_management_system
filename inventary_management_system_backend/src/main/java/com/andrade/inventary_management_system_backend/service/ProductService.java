@@ -7,7 +7,7 @@ import com.andrade.inventary_management_system_backend.dto.Response;
 
 public interface ProductService {
 
-    Response createProduct(ProductDto productDto, MultipartFile image);
+    Response createProduct(String productDto, MultipartFile image);
 
     Response updateProduct(ProductDto productDto, MultipartFile file);
 

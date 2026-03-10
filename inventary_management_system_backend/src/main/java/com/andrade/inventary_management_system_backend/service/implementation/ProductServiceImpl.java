@@ -18,9 +18,11 @@ import com.andrade.inventary_management_system_backend.dto.ProductDto;
 import com.andrade.inventary_management_system_backend.dto.Response;
 import com.andrade.inventary_management_system_backend.exception.EmptyResourceException;
 import com.andrade.inventary_management_system_backend.exception.NotFoundException;
+import com.andrade.inventary_management_system_backend.exception.SerializationException;
 import com.andrade.inventary_management_system_backend.repository.CategoryRepository;
 import com.andrade.inventary_management_system_backend.repository.ProductRepository;
 import com.andrade.inventary_management_system_backend.service.ProductService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -36,37 +38,46 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ModelMapper modelMapper;
     private final CategoryRepository categoryRepository;
+    private final ObjectMapper mapper; // using that to mapper only String productDTO cuz modelMapper got some kind
+                                       // issue, and i don't think i should take any longer
 
     private static final String DIRECTORY_IMAGE = System.getProperty("user.dir") + "/product-image/";
     private final Integer imagaMaxSize = 10 * 1024 * 1024;
 
     @Override
-    public Response createProduct(ProductDto productDto, MultipartFile image) {
-
-        Category categoryProduct = categoryRepository.findById(productDto.getIdCategory())
-                .orElseThrow(() -> new NotFoundException("Undefined category"));
+    public Response createProduct(String productDtoStringValue, MultipartFile image) {
 
         if (image == null || image.isEmpty()) {
             throw new EmptyResourceException("Image undefined");
         }
+        try {
+            ProductDto productDto = mapper.readValue(productDtoStringValue, ProductDto.class);
 
-        String imagePath = saveImage(image);
+            String imagePath = saveImage(image);
 
-        Product product = Product.builder()
-                .price(productDto.getPrice())
-                .sku(productDto.getSku())
-                .quantStock(productDto.getQuantStock())
-                .description(productDto.getDescription())
-                .expireDate(productDto.getExpireDate())
-                .category(categoryProduct)
-                .imageUrl(imagePath)
-                .build();
+            Category categoryProduct = categoryRepository.findById(productDto.getIdCategory())
+                    .orElseThrow(() -> new NotFoundException("Undefined category"));
 
-        productRepository.save(product);
-        return Response.builder()
-                .status(HttpStatus.CREATED.value())
-                .message("Product saved sucessfully")
-                .build();
+            Product product = Product.builder()
+                    .price(productDto.getPrice())
+                    .sku(productDto.getSku())
+                    .quantStock(productDto.getQuantStock())
+                    .description(productDto.getDescription())
+                    .expireDate(productDto.getExpireDate())
+                    .category(categoryProduct)
+                    .imageUrl(imagePath)
+                    .build();
+
+            productRepository.save(product);
+            return Response.builder()
+                    .status(HttpStatus.CREATED.value())
+                    .message("Product saved sucessfully")
+                    .build();
+
+        } catch (Exception e) {
+            throw new SerializationException(
+                    "Cannot serialize product. Ensure all fields in the product data are correct and valid");
+        }
     }
 
     @Override
