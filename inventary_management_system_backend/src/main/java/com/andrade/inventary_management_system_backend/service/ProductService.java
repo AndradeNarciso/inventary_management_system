@@ -9,7 +9,7 @@ public interface ProductService {
 
     Response createProduct(String productDto, MultipartFile image);
 
-    Response updateProduct(ProductDto productDto, MultipartFile file);
+    Response updateProduct(String productDto, MultipartFile file);
 
     Response getAll();
 
