@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,12 +17,16 @@ import com.andrade.inventary_management_system_backend.domain.Product;
 
 import com.andrade.inventary_management_system_backend.dto.ProductDto;
 import com.andrade.inventary_management_system_backend.dto.Response;
+import com.andrade.inventary_management_system_backend.exception.CustomBadRequestException;
+import com.andrade.inventary_management_system_backend.exception.DuplicatedValueException;
 import com.andrade.inventary_management_system_backend.exception.EmptyResourceException;
 import com.andrade.inventary_management_system_backend.exception.NotFoundException;
 import com.andrade.inventary_management_system_backend.exception.SerializationException;
 import com.andrade.inventary_management_system_backend.repository.CategoryRepository;
 import com.andrade.inventary_management_system_backend.repository.ProductRepository;
 import com.andrade.inventary_management_system_backend.service.ProductService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
@@ -53,10 +58,17 @@ public class ProductServiceImpl implements ProductService {
         try {
             ProductDto productDto = mapper.readValue(productDtoStringValue, ProductDto.class);
 
-            String imagePath = saveImage(image);
+           
 
             Category categoryProduct = categoryRepository.findById(productDto.getIdCategory())
                     .orElseThrow(() -> new NotFoundException("Undefined category"));
+
+            if (productRepository.existsBySku(productDto.getSku())) {
+                throw new DuplicatedValueException("Sku already exist");
+
+            }
+
+             String imagePath = saveImage(image);
 
             Product product = Product.builder()
                     .price(productDto.getPrice())
@@ -74,56 +86,72 @@ public class ProductServiceImpl implements ProductService {
                     .message("Product saved sucessfully")
                     .build();
 
-        } catch (Exception e) {
-            throw new SerializationException(
+        } catch (DuplicatedValueException ex) {
+            throw new DuplicatedValueException(ex.getMessage());
+
+        }
+
+        catch (Exception e) {
+            throw new CustomBadRequestException(
                     "Cannot serialize product. Ensure all fields in the product data are correct and valid");
         }
+
     }
 
     @Override
-    public Response updateProduct(ProductDto productDto, MultipartFile image) {
-        Product product = productRepository.findById(productDto.getId())
-                .orElseThrow(() -> new NotFoundException("Producto was not found"));
+    public Response updateProduct(String productDtoStringValue, MultipartFile image) {
 
-        if (image != null && !image.isEmpty()) {
-            String newImagePath = saveImage(image);
-            product.setImageUrl(newImagePath);
+        try {
+            ProductDto productDto = mapper.readValue(productDtoStringValue, ProductDto.class);
+
+            Product product = productRepository.findById(productDto.getIdProduct())
+                    .orElseThrow(() -> new NotFoundException("Producto was not found"));
+
+            if (image != null && !image.isEmpty()) {
+                String newImagePath = saveImage(image);
+                product.setImageUrl(newImagePath);
+            }
+
+            if (productDto.getIdCategory() != null && productDto.getIdCategory() > 0) {
+
+                Category newCategory = categoryRepository.findById(productDto.getIdCategory())
+                        .orElseThrow(() -> new NotFoundException("Category was not found"));
+
+                product.setCategory(newCategory);
+            }
+
+            if (productDto.getDescription() != null && !productDto.getDescription().isBlank()) {
+                product.setDescription(productDto.getDescription());
+            }
+
+            if (productDto.getName() != null && !productDto.getName().isBlank()) {
+                product.setName(productDto.getName());
+            }
+
+            if (productDto.getSku() != null && !productDto.getSku().isBlank()) {
+                product.setSku(productDto.getSku());
+            }
+
+            if (productDto.getPrice() != null && productDto.getPrice().compareTo(BigDecimal.ZERO) >= 0) {
+                product.setPrice(productDto.getPrice());
+            }
+
+            if (productDto.getQuantStock() != null && productDto.getQuantStock() >= 0) {
+                product.setQuantStock(productDto.getQuantStock());
+            }
+
+            productRepository.save(product);
+
+            return Response.builder()
+                    .status(HttpStatus.OK.value())
+                    .message("Product updated sucessfully")
+                    .build();
+        } catch (JsonMappingException e) {
+            throw new SerializationException("Error trying mapping Product");
+        } catch (JsonProcessingException e) {
+            throw new SerializationException("Error trying processing Product");
         }
 
-        if (productDto.getIdCategory() != null && productDto.getIdCategory() > 0) {
-
-            Category newCategory = categoryRepository.findById(productDto.getIdCategory())
-                    .orElseThrow(() -> new NotFoundException("Category was not found"));
-
-            product.setCategory(newCategory);
-        }
-
-        if (productDto.getDescription() != null && !productDto.getDescription().isBlank()) {
-            product.setDescription(productDto.getDescription());
-        }
-
-        if (productDto.getName() != null && !productDto.getName().isBlank()) {
-            product.setName(productDto.getName());
-        }
-
-        if (productDto.getSku() != null && !productDto.getSku().isBlank()) {
-            product.setSku(productDto.getSku());
-        }
-
-        if (productDto.getPrice() != null && productDto.getPrice().compareTo(BigDecimal.ZERO) >= 0) {
-            product.setSku(productDto.getSku());
-        }
-
-        if (productDto.getQuantStock() != null && productDto.getQuantStock() >= 0) {
-            product.setQuantStock(productDto.getQuantStock());
-        }
-
-        productRepository.save(product);
-
-        return Response.builder()
-                .status(HttpStatus.OK.value())
-                .message("Product updated sucessfully")
-                .build();
     }
 
     @Override

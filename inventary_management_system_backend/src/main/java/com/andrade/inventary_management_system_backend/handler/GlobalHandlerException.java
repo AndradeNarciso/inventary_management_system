@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.andrade.inventary_management_system_backend.dto.Response;
-import com.andrade.inventary_management_system_backend.exception.BadRequestException;
+import com.andrade.inventary_management_system_backend.exception.CustomBadRequestException;
 import com.andrade.inventary_management_system_backend.exception.DuplicatedValueException;
 import com.andrade.inventary_management_system_backend.exception.EmptyResourceException;
 import com.andrade.inventary_management_system_backend.exception.HeaderNotFoundException;
@@ -151,8 +151,8 @@ public class GlobalHandlerException {
 
         return new ResponseEntity<>(responseSerializationException, HttpStatus.BAD_REQUEST);
     }
-       @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<Response> handleSerializationException(BadRequestException ex) {
+       @ExceptionHandler(CustomBadRequestException.class)
+    public ResponseEntity<Response> handleSerializationException(CustomBadRequestException ex) {
         Response responseBadRequestException = Response.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .message(ex.getMessage())

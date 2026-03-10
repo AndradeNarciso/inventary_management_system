@@ -1,7 +1,6 @@
 package com.andrade.inventary_management_system_backend.controller;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,10 +14,9 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.andrade.inventary_management_system_backend.dto.ProductDto;
+
 import com.andrade.inventary_management_system_backend.dto.Response;
 import com.andrade.inventary_management_system_backend.service.implementation.ProductServiceImpl;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,9 +26,8 @@ import lombok.RequiredArgsConstructor;
 public class ProductController {
 
     private final ProductServiceImpl productService;
-    private final ObjectMapper mapper;
 
-    @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping("/add")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> createProduct(
             @RequestPart("product") String productDtoStringValue,
@@ -41,13 +38,13 @@ public class ProductController {
                 .body(productService.createProduct(productDtoStringValue, image));
     }
 
-    @PutMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping("/update")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> updateProduct(
-            @RequestPart("product") ProductDto productDto,
+            @RequestPart("product") String productDtoStringValue,
             @RequestPart("image") MultipartFile image) {
 
-        return ResponseEntity.ok(productService.updateProduct(productDto, image));
+        return ResponseEntity.ok(productService.updateProduct(productDtoStringValue, image));
     }
 
     @GetMapping("/all")
