@@ -15,7 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.andrade.inventary_management_system_backend.dto.Response;
 import com.andrade.inventary_management_system_backend.dto.CategoryDto;
-import com.andrade.inventary_management_system_backend.service.implementation.CategoryServiceImpl;
+import com.andrade.inventary_management_system_backend.service.CategoryService;
+
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 
 public class CategoryController {
 
-    private final CategoryServiceImpl categoryService;
+    private final CategoryService categoryService;
 
     @GetMapping("/all")
     public ResponseEntity<Response> getAllCategory() {

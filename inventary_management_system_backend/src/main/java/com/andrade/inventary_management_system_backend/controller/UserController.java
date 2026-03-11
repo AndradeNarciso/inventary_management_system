@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.andrade.inventary_management_system_backend.domain.User;
 import com.andrade.inventary_management_system_backend.dto.Response;
 import com.andrade.inventary_management_system_backend.dto.UserDto;
-import com.andrade.inventary_management_system_backend.service.implementation.UserServiceImpl;
+import com.andrade.inventary_management_system_backend.service.UserService;
+
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("api/v1/user")
 public class UserController {
 
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
     @GetMapping("/all")
     @PreAuthorize("hasAuthority('ADMIN')")

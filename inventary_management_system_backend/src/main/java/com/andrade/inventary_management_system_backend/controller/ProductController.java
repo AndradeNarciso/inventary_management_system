@@ -16,7 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import com.andrade.inventary_management_system_backend.dto.Response;
-import com.andrade.inventary_management_system_backend.service.implementation.ProductServiceImpl;
+import com.andrade.inventary_management_system_backend.service.ProductService;
+
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProductController {
 
-    private final ProductServiceImpl productService;
+    private final ProductService productService;
 
     @PostMapping("/add")
     @PreAuthorize("hasAuthority('ADMIN')")

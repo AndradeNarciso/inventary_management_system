@@ -17,7 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.andrade.inventary_management_system_backend.dto.Response;
 import com.andrade.inventary_management_system_backend.dto.SupplierDto;
-import com.andrade.inventary_management_system_backend.service.implementation.SupplierServiceImpl;
+import com.andrade.inventary_management_system_backend.service.SupplierService;
+
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SupplierController {
 
-    private final SupplierServiceImpl supplierService;
+    private final SupplierService supplierService;
 
     @GetMapping("/all")
     @PreAuthorize("hasAuthority('ADMIN')")

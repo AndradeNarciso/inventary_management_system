@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.andrade.inventary_management_system_backend.dto.LoginRequest;
 import com.andrade.inventary_management_system_backend.dto.RegisterRequest;
 import com.andrade.inventary_management_system_backend.dto.Response;
-import com.andrade.inventary_management_system_backend.service.implementation.UserServiceImpl;
+import com.andrade.inventary_management_system_backend.service.UserService;
+
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("api/v1/auth")
 public class AuthController {
 
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<Response> registerUser(@Valid @RequestBody RegisterRequest register) {
