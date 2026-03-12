@@ -1,7 +1,7 @@
 package com.andrade.inventary_management_system_backend.service;
 
 import com.andrade.inventary_management_system_backend.dto.SupplierDto;
-import com.andrade.inventary_management_system_backend.dto.SupplierUpdateDto;
+
 
 import java.util.UUID;
 
@@ -15,9 +15,9 @@ public interface SupplierService {
 
     Response getSupplierById(UUID id);
 
-    Response updateSupplier(UUID id, SupplierDto suppliCategoryDto);
+    Response updateSupplier(UUID id, SupplierDto supplierDto);
 
     Response deleteSupplier(UUID id);
 
-    Response updateSupplier(UUID id, SupplierUpdateDto supplierDto);
+    
 }

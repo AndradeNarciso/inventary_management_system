@@ -1,8 +1,15 @@
 package com.andrade.inventary_management_system_backend.service.implementation;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -14,21 +21,19 @@ import com.andrade.inventary_management_system_backend.dto.Response;
 import com.andrade.inventary_management_system_backend.dto.TransactionDto;
 import com.andrade.inventary_management_system_backend.dto.TransactionRequest;
 import com.andrade.inventary_management_system_backend.enums.TransactionStatus;
+import com.andrade.inventary_management_system_backend.enums.TransactionType;
 import com.andrade.inventary_management_system_backend.exception.NotFoundException;
 import com.andrade.inventary_management_system_backend.repository.ProductRepository;
 import com.andrade.inventary_management_system_backend.repository.SupplierRepository;
 import com.andrade.inventary_management_system_backend.repository.TransactionRepository;
 import com.andrade.inventary_management_system_backend.service.TransactionService;
 import com.andrade.inventary_management_system_backend.service.UserService;
+import com.andrade.inventary_management_system_backend.specification.TransactionFilter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-/*   @Positive Long productId,
-        @Min(value = 0) Integer quant,
-        UUID supplierId,
-        @NotBlank String note,
-        @NotBlank String description */
+
 
 @Service
 @RequiredArgsConstructor
@@ -57,26 +62,118 @@ public class TransactionServiceImpl implements TransactionService {
         Integer quantity = transactionRequest.quant();
 
         User user = userService.getCurrentLoggedInUser();
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'purchase'");
+
+        product.setQuantStock(product.getQuantStock() + quantity);
+        productRepository.save(product);
+
+        Transaction transaction = Transaction.builder()
+                .product(product)
+                .transactionStatus(TransactionStatus.COMPLETED)
+                .transactionType(TransactionType.PURCHASE)
+                .user(user)
+                .supplier(supplier)
+                .totalProduct(quantity)
+                .totalPrice(product.getPrice().multiply(BigDecimal.valueOf(quantity)))
+                .note(transactionRequest.note())
+                .description(transactionRequest.description())
+                .build();
+
+        transactionRepository.save(transaction);
+
+        return Response.builder()
+                .status(HttpStatus.OK.value())
+                .message("Purchase done sucessfully")
+                .build();
+
     }
 
     @Override
     public Response sell(TransactionRequest transactionRequest) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'sell'");
+
+        Long idProduct = transactionRequest.productId();
+        Product product = productRepository.findById(idProduct)
+                .orElseThrow(() -> new NotFoundException("product does not exists "));
+
+        Integer quantity = transactionRequest.quant();
+        product.setQuantStock(product.getQuantStock() - quantity);
+
+        User user = userService.getCurrentLoggedInUser();
+
+        Transaction transaction = Transaction.builder()
+                .transactionType(TransactionType.SALE)
+                .transactionStatus(TransactionStatus.COMPLETED)
+                .user(user)
+                .totalProduct(quantity)
+                .totalPrice(product.getPrice().multiply(BigDecimal.valueOf(quantity)))
+                .note(transactionRequest.note())
+                .description(transactionRequest.description())
+                .build();
+
+        transactionRepository.save(transaction);
+
+        return Response.builder()
+                .status(HttpStatus.OK.value())
+                .message("Sale done sucessfully")
+                .build();
+
     }
 
     @Override
     public Response returnToSupplier(TransactionRequest transactionRequest) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'returnToSupplier'");
+
+        Long idProduct = transactionRequest.productId();
+
+        Product product = productRepository.findById(idProduct)
+                .orElseThrow(() -> new NotFoundException("product does not exists "));
+
+        Integer quantity = transactionRequest.quant();
+
+        UUID idSupplier = transactionRequest.supplierId();
+
+        Supplier supplier = supplierRepository.findById(idSupplier)
+                .orElseThrow(() -> new NotFoundException("Supplier does not exists"));
+
+        product.setQuantStock(product.getQuantStock() - quantity);
+        productRepository.save(product);
+
+        User user = userService.getCurrentLoggedInUser();
+
+        Transaction transaction = Transaction.builder()
+                .transactionType(TransactionType.RETURN_TO_SUPPLIER)
+                .transactionStatus(TransactionStatus.PROCESSING)
+                .user(user)
+                .totalProduct(quantity)
+                .totalPrice(BigDecimal.ZERO)
+                .note(transactionRequest.note())
+                .description(transactionRequest.description())
+                .supplier(supplier)
+                .build();
+
+        transactionRepository.save(transaction);
+
+        return Response.builder()
+                .status(HttpStatus.OK.value())
+                .message("product return to supplier in process")
+                .build();
     }
 
     @Override
-    public Response getAllTransaction(int page, int size, String filter) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAllTransaction'");
+    public Response getAllTransaction(String filter, Pageable page) {
+
+        Specification<Transaction> spec = TransactionFilter.filterByValue(filter);
+
+        Page<Transaction> pagaTransactionByFilterList = transactionRepository.findAll(spec, page);
+        List<TransactionDto> transactionDtoByFilterList = modelMapper.map(pagaTransactionByFilterList.getContent(),
+                new TypeToken<List<TransactionDto>>() {
+                }.getType());
+
+        return Response.builder()
+                .status(HttpStatus.OK.value())
+                .transactionDtos(transactionDtoByFilterList)
+                .totalElement(pagaTransactionByFilterList.getTotalElements())
+                .totalPage(pagaTransactionByFilterList.getTotalPages())
+                .build();
+
     }
 
     @Override
@@ -94,8 +191,19 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Response getByMonthAndYear(int month, int year) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getByMonthAndYear'");
+
+        Specification<Transaction> spec = TransactionFilter.monthAndYear(month, year);
+
+        List<Transaction> transactionsByMonthAndYearList = transactionRepository.findAll(spec);
+        List<TransactionDto> transactionDtoByFilterList = modelMapper.map(transactionsByMonthAndYearList,
+                new TypeToken<List<TransactionDto>>() {
+                }.getType());
+
+        return Response.builder()
+                .status(HttpStatus.OK.value())
+                .transactionDtos(transactionDtoByFilterList)
+                .message("Sucess")
+                .build();
     }
 
     @Override
@@ -105,7 +213,9 @@ public class TransactionServiceImpl implements TransactionService {
                 .orElseThrow(() -> new NotFoundException("Transaction was not found "));
 
         savedTransaction.setTransactionStatus(status);
+        savedTransaction.setUpdateAt(LocalDateTime.now());
         transactionRepository.save(savedTransaction);
+        
         log.info("A Transaction was updated");
 
         return Response.builder()

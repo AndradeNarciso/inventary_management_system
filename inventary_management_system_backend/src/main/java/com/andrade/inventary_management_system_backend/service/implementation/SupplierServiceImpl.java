@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import com.andrade.inventary_management_system_backend.domain.Supplier;
 import com.andrade.inventary_management_system_backend.dto.SupplierDto;
-import com.andrade.inventary_management_system_backend.dto.SupplierUpdateDto;
 import com.andrade.inventary_management_system_backend.dto.Response;
 import com.andrade.inventary_management_system_backend.exception.DuplicatedValueException;
 import com.andrade.inventary_management_system_backend.exception.NotFoundException;
@@ -69,24 +68,24 @@ public class SupplierServiceImpl implements SupplierService {
         }
 
         @Override
-        public Response updateSupplier(UUID id, SupplierUpdateDto supplierDto) {
+        public Response updateSupplier(UUID id, SupplierDto supplierDto) {
                 Supplier savedSupplier = supplierRepository.findById(id)
                                 .orElseThrow(() -> new NotFoundException("Supplier not found"));
 
-                if (supplierDto.adress() != null) {
-                        savedSupplier.setAdress(supplierDto.adress());
+                if (supplierDto.getAdress() != null) {
+                        savedSupplier.setAdress(supplierDto.getAdress());
                 }
 
-                if (supplierDto.name() != null) {
-                        savedSupplier.setName(supplierDto.name());
+                if (supplierDto.getName() != null) {
+                        savedSupplier.setName(supplierDto.getName());
                 }
 
-                if(savedSupplier.getName().equals(supplierDto.name())){
+                if (savedSupplier.getName().equals(supplierDto.getName())) {
                         throw new DuplicatedValueException("Supplier's alredy exists");
                 }
 
-                if (supplierDto.contactInfo() != null ) {
-                        savedSupplier.setContactInfo(supplierDto.contactInfo());
+                if (supplierDto.getContactInfo() != null) {
+                        savedSupplier.setContactInfo(supplierDto.getContactInfo());
                 }
 
                 return Response.builder()
@@ -107,12 +106,6 @@ public class SupplierServiceImpl implements SupplierService {
                                 .message("Supplier deleted")
                                 .build();
 
-        }
-
-        @Override
-        public Response updateSupplier(UUID id, SupplierDto suppliCategoryDto) {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'updateSupplier'");
         }
 
 }
