@@ -13,7 +13,7 @@ public class PeagebleConfig implements WebMvcConfigurer {
 
     public PageableHandlerMethodArgumentResolver pageHandler() {
         var pageHandler = new PageableHandlerMethodArgumentResolver();
-        pageHandler.setFallbackPageable(PageRequest.of(0, 10));
+        pageHandler.setFallbackPageable(PageRequest.of(0, 1000));
         return pageHandler;
     }
 
