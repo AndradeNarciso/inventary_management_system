@@ -22,6 +22,7 @@ import com.andrade.inventary_management_system_backend.dto.TransactionDto;
 import com.andrade.inventary_management_system_backend.dto.TransactionRequest;
 import com.andrade.inventary_management_system_backend.enums.TransactionStatus;
 import com.andrade.inventary_management_system_backend.enums.TransactionType;
+import com.andrade.inventary_management_system_backend.exception.CustomBadRequestException;
 import com.andrade.inventary_management_system_backend.exception.NotFoundException;
 import com.andrade.inventary_management_system_backend.repository.ProductRepository;
 import com.andrade.inventary_management_system_backend.repository.SupplierRepository;
@@ -30,199 +31,221 @@ import com.andrade.inventary_management_system_backend.service.TransactionServic
 import com.andrade.inventary_management_system_backend.service.UserService;
 import com.andrade.inventary_management_system_backend.specification.TransactionFilter;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(rollbackOn = Exception.class)
 public class TransactionServiceImpl implements TransactionService {
 
-    private final TransactionRepository transactionRepository;
-    private final ModelMapper modelMapper;
-    private final SupplierRepository supplierRepository;
-    private final ProductRepository productRepository;
-    private final UserService userService;
+        private final TransactionRepository transactionRepository;
+        private final ModelMapper modelMapper;
+        private final SupplierRepository supplierRepository;
+        private final ProductRepository productRepository;
+        private final UserService userService;
 
-    @Override
-    public Response purchase(TransactionRequest transactionRequest) {
+        @Override
+        public Response purchase(TransactionRequest transactionRequest) {
 
-        UUID idSupplier = transactionRequest.supplierId();
+                UUID idSupplier = transactionRequest.supplierId();
 
-        Supplier supplier = supplierRepository.findById(idSupplier)
-                .orElseThrow(() -> new NotFoundException("Supplier does not exists"));
+                Supplier supplier = supplierRepository.findById(idSupplier)
+                                .orElseThrow(() -> new NotFoundException("Supplier does not exists"));
 
-        Long idProduct = transactionRequest.productId();
+                Long idProduct = transactionRequest.productId();
 
-        Product product = productRepository.findById(idProduct)
-                .orElseThrow(() -> new NotFoundException("product does not exists "));
+                Product product = productRepository.findById(idProduct)
+                                .orElseThrow(() -> new NotFoundException("product does not exists "));
 
-        Integer quantity = transactionRequest.quant();
+                Integer quantity = transactionRequest.quant();
 
-        User user = userService.getCurrentLoggedInUser();
+                User user = userService.getCurrentLoggedInUser();
 
-        product.setQuantStock(product.getQuantStock() + quantity);
-        productRepository.save(product);
+                product.setQuantStock(product.getQuantStock() + quantity);
+                productRepository.save(product);
 
-        Transaction transaction = Transaction.builder()
-                .product(product)
-                .transactionStatus(TransactionStatus.COMPLETED)
-                .transactionType(TransactionType.PURCHASE)
-                .user(user)
-                .supplier(supplier)
-                .totalProduct(quantity)
-                .totalPrice(product.getPrice().multiply(BigDecimal.valueOf(quantity)))
-                .note(transactionRequest.note())
-                .description(transactionRequest.description())
-                .build();
+                Transaction transaction = Transaction.builder()
+                                .product(product)
+                                .transactionStatus(TransactionStatus.COMPLETED)
+                                .transactionType(TransactionType.PURCHASE)
+                                .user(user)
+                                .supplier(supplier)
+                                .totalProduct(quantity)
+                                .totalPrice(product.getPrice().multiply(BigDecimal.valueOf(quantity)))
+                                .note(transactionRequest.note())
+                                .description(transactionRequest.description())
+                                .build();
 
-        transactionRepository.save(transaction);
+                transactionRepository.save(transaction);
 
-        return Response.builder()
-                .status(HttpStatus.OK.value())
-                .message("Purchase done sucessfully")
-                .build();
+                return Response.builder()
+                                .status(HttpStatus.CREATED.value())
+                                .message("Purchase done sucessfully")
+                                .build();
 
-    }
+        }
 
-    @Override
-    public Response sell(TransactionRequest transactionRequest) {
+        @Override
+        public Response sell(TransactionRequest transactionRequest) {
 
-        Long idProduct = transactionRequest.productId();
-        Product product = productRepository.findById(idProduct)
-                .orElseThrow(() -> new NotFoundException("product does not exists "));
+                Long idProduct = transactionRequest.productId();
+                Product product = productRepository.findById(idProduct)
+                                .orElseThrow(() -> new NotFoundException("product does not exists "));
 
-        Integer quantity = transactionRequest.quant();
-        product.setQuantStock(product.getQuantStock() - quantity);
+                Integer quantity = transactionRequest.quant();
 
-        User user = userService.getCurrentLoggedInUser();
+                if (product.getQuantStock() < quantity) {
+                        throw new CustomBadRequestException("Requested quantity is unavailable");
+                }
 
-        Transaction transaction = Transaction.builder()
-                .transactionType(TransactionType.SALE)
-                .transactionStatus(TransactionStatus.COMPLETED)
-                .user(user)
-                .totalProduct(quantity)
-                .totalPrice(product.getPrice().multiply(BigDecimal.valueOf(quantity)))
-                .note(transactionRequest.note())
-                .description(transactionRequest.description())
-                .build();
+                product.setQuantStock(product.getQuantStock() - quantity);
+                productRepository.save(product);
 
-        transactionRepository.save(transaction);
+                User user = userService.getCurrentLoggedInUser();
 
-        return Response.builder()
-                .status(HttpStatus.OK.value())
-                .message("Sale done sucessfully")
-                .build();
+                Transaction transaction = Transaction.builder()
+                                .transactionType(TransactionType.SALE)
+                                .transactionStatus(TransactionStatus.COMPLETED)
+                                .user(user)
+                                .totalProduct(quantity)
+                                .totalPrice(product.getPrice().multiply(BigDecimal.valueOf(quantity)))
+                                .note(transactionRequest.note())
+                                .description(transactionRequest.description())
+                                .build();
 
-    }
+                transactionRepository.save(transaction);
 
-    @Override
-    public Response returnToSupplier(TransactionRequest transactionRequest) {
+                return Response.builder()
+                                .status(HttpStatus.OK.value())
+                                .message("Sale done sucessfully")
+                                .build();
 
-        Long idProduct = transactionRequest.productId();
+        }
 
-        Product product = productRepository.findById(idProduct)
-                .orElseThrow(() -> new NotFoundException("product does not exists "));
+        @Override
+        public Response returnToSupplier(TransactionRequest transactionRequest) {
 
-        Integer quantity = transactionRequest.quant();
+                Long idProduct = transactionRequest.productId();
 
-        UUID idSupplier = transactionRequest.supplierId();
+                Product product = productRepository.findById(idProduct)
+                                .orElseThrow(() -> new NotFoundException("product does not exists "));
 
-        Supplier supplier = supplierRepository.findById(idSupplier)
-                .orElseThrow(() -> new NotFoundException("Supplier does not exists"));
+                Integer quantity = transactionRequest.quant();
 
-        product.setQuantStock(product.getQuantStock() - quantity);
-        productRepository.save(product);
+                UUID idSupplier = transactionRequest.supplierId();
 
-        User user = userService.getCurrentLoggedInUser();
+                Supplier supplier = supplierRepository.findById(idSupplier)
+                                .orElseThrow(() -> new NotFoundException("Supplier does not exists"));
 
-        Transaction transaction = Transaction.builder()
-                .transactionType(TransactionType.RETURN_TO_SUPPLIER)
-                .transactionStatus(TransactionStatus.PROCESSING)
-                .user(user)
-                .totalProduct(quantity)
-                .totalPrice(BigDecimal.ZERO)
-                .note(transactionRequest.note())
-                .description(transactionRequest.description())
-                .supplier(supplier)
-                .build();
+                product.setQuantStock(product.getQuantStock() - quantity);
+                productRepository.save(product);
 
-        transactionRepository.save(transaction);
+                User user = userService.getCurrentLoggedInUser();
 
-        return Response.builder()
-                .status(HttpStatus.OK.value())
-                .message("product return to supplier in process")
-                .build();
-    }
+                Transaction transaction = Transaction.builder()
+                                .transactionType(TransactionType.RETURN_TO_SUPPLIER)
+                                .transactionStatus(TransactionStatus.PROCESSING)
+                                .user(user)
+                                .totalProduct(quantity)
+                                .totalPrice(BigDecimal.ZERO)
+                                .note(transactionRequest.note())
+                                .description(transactionRequest.description())
+                                .supplier(supplier)
+                                .build();
 
-    @Override
-    public Response getAllTransaction(String filter, Pageable page) {
+                transactionRepository.save(transaction);
 
-        Specification<Transaction> spec = TransactionFilter.filterByValue(filter);
+                return Response.builder()
+                                .status(HttpStatus.OK.value())
+                                .message("product return to supplier in process")
+                                .build();
+        }
 
-        Page<Transaction> pagaTransactionByFilterList = transactionRepository.findAll(spec, page);
-        List<TransactionDto> transactionDtoByFilterList = modelMapper.map(pagaTransactionByFilterList.getContent(),
-                new TypeToken<List<TransactionDto>>() {
-                }.getType());
+        @Override
+        public Response getAllTransaction(String filter, Pageable page) {
 
-        return Response.builder()
-                .status(HttpStatus.OK.value())
-                .transactionDtos(transactionDtoByFilterList)
-                .totalElement(pagaTransactionByFilterList.getTotalElements())
-                .totalPage(pagaTransactionByFilterList.getTotalPages())
-                .build();
+                Specification<Transaction> spec = TransactionFilter.filterByValue(filter);
 
-    }
+                Page<Transaction> pagaTransactionByFilterList = transactionRepository.findAll(spec, page);
+                List<TransactionDto> transactionDtoByFilterList = modelMapper.map(
+                                pagaTransactionByFilterList.getContent(),
+                                new TypeToken<List<TransactionDto>>() {
+                                }.getType());
 
-    @Override
-    public Response getTransactionById(UUID id) {
+                
+                  transactionDtoByFilterList.forEach(t -> {
+                  t.setProduct(null);
+                  t.setUser(null);
+                  t.setSupplier(null);
+                  
+                  });
+                 
+                return Response.builder()
+                                .status(HttpStatus.OK.value())
+                                .transactionDtos(transactionDtoByFilterList)
+                                .totalElement(pagaTransactionByFilterList.getTotalElements())
+                                .totalPage(pagaTransactionByFilterList.getTotalPages())
+                                .build();
 
-        Transaction savedTransaction = transactionRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Transaction was not found "));
+        }
 
-        return Response.builder()
-                .status(HttpStatus.OK.value())
-                .transactionDto(modelMapper.map(savedTransaction, TransactionDto.class))
-                .build();
+        @Override
+        public Response getTransactionById(UUID id) {
 
-    }
+                Transaction savedTransaction = transactionRepository.findById(id)
+                                .orElseThrow(() -> new NotFoundException("Transaction was not found "));
 
-    @Override
-    public Response getByMonthAndYear(int month, int year) {
+                return Response.builder()
+                                .status(HttpStatus.OK.value())
+                                .transactionDto(modelMapper.map(savedTransaction, TransactionDto.class))
+                                .build();
 
-        Specification<Transaction> spec = TransactionFilter.monthAndYear(month, year);
+        }
 
-        List<Transaction> transactionsByMonthAndYearList = transactionRepository.findAll(spec);
-        List<TransactionDto> transactionDtoByFilterList = modelMapper.map(transactionsByMonthAndYearList,
-                new TypeToken<List<TransactionDto>>() {
-                }.getType());
+        @Override
+        public Response getByMonthAndYear(int month, int year) {
 
-        return Response.builder()
-                .status(HttpStatus.OK.value())
-                .transactionDtos(transactionDtoByFilterList)
-                .message("Sucess")
-                .build();
-    }
+                Specification<Transaction> spec = TransactionFilter.monthAndYear(month, year);
 
-    @Override
-    public Response UpdateTransactionStatus(UUID id, TransactionStatus status) {
+                List<Transaction> transactionsByMonthAndYearList = transactionRepository.findAll(spec);
+                List<TransactionDto> transactionDtoByFilterList = modelMapper.map(transactionsByMonthAndYearList,
+                                new TypeToken<List<TransactionDto>>() {
+                                }.getType());
 
-        Transaction savedTransaction = transactionRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Transaction was not found "));
+                transactionDtoByFilterList.forEach(t -> {
+                        t.setProduct(null);
+                        t.setUser(null);
+                        t.setSupplier(null);
 
-        savedTransaction.setTransactionStatus(status);
-        savedTransaction.setUpdateAt(LocalDateTime.now());
-        transactionRepository.save(savedTransaction);
-        
-        log.info("A Transaction was updated");
+                });
 
-        return Response.builder()
-                .status(HttpStatus.OK.value())
-                .message("Transaction updated sucessfully")
-                .build();
+                return Response.builder()
+                                .status(HttpStatus.OK.value())
+                                .transactionDtos(transactionDtoByFilterList)
+                                .message("Sucess")
+                                .build();
+        }
 
-    }
+        @Override
+        public Response updateTransactionStatus(UUID id, TransactionStatus status) {
+
+                Transaction savedTransaction = transactionRepository.findById(id)
+                                .orElseThrow(() -> new NotFoundException("Transaction was not found "));
+
+                savedTransaction.setTransactionStatus(status);
+                savedTransaction.setUpdateAt(LocalDateTime.now());
+                transactionRepository.save(savedTransaction);
+
+                log.info("A Transaction was updated");
+
+                return Response.builder()
+                                .status(HttpStatus.OK.value())
+                                .message("Transaction updated sucessfully")
+                                .build();
+
+        }
 
 }

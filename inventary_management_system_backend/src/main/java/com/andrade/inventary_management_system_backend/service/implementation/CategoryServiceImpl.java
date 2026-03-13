@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(rollbackOn = Exception.class)
 public class CategoryServiceImpl implements CategoryService {
         
         private final CategoryRepository categoryRepository;

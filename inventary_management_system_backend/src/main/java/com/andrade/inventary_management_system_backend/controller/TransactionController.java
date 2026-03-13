@@ -45,8 +45,8 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.returnToSupplier(transactionRequest));
     }
 
-    @GetMapping("/all/{filter}")
-    public ResponseEntity<Response> getAllTransaction(@PathVariable String filter, Pageable page) {
+    @GetMapping("/all")
+    public ResponseEntity<Response> getAllTransaction(@RequestParam(required = false) String filter, Pageable page) {
         return ResponseEntity.ok(transactionService.getAllTransaction(filter, page));
     }
 
@@ -61,7 +61,7 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.getByMonthAndYear(monthParam, yearParam));
     }
 
-    @GetMapping("/{id}}")
+    @GetMapping("/{id}")
     public ResponseEntity<Response> getAllTransactionById(@PathVariable UUID id) {
         return ResponseEntity.ok(transactionService.getTransactionById(id));
     }
@@ -70,6 +70,6 @@ public class TransactionController {
 
     public ResponseEntity<Response> UpdateTransaction(@PathVariable UUID id,
             @Valid @RequestBody TransactionStatus status) {
-        return ResponseEntity.ok(transactionService.UpdateTransactionStatus(id, status));
+        return ResponseEntity.ok(transactionService.updateTransactionStatus(id, status));
     }
 }

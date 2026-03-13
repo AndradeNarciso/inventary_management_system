@@ -35,8 +35,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 @Slf4j
+@Transactional(rollbackOn = Exception.class)
 
 public class ProductServiceImpl implements ProductService {
 

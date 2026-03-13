@@ -21,6 +21,6 @@ public interface TransactionService {
 
     Response getByMonthAndYear(int month, int year);
 
-    Response UpdateTransactionStatus(UUID id, TransactionStatus status);
+    Response updateTransactionStatus(UUID id, TransactionStatus status);
 
 }

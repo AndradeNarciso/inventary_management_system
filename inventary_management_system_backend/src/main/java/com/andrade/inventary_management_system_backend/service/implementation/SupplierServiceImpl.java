@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(rollbackOn = Exception.class)
 public class SupplierServiceImpl implements SupplierService {
 
         private final SupplierRepository supplierRepository;
