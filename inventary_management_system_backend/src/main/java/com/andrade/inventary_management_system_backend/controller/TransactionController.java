@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.andrade.inventary_management_system_backend.dto.Response;
+import com.andrade.inventary_management_system_backend.dto.StatusDto;
 import com.andrade.inventary_management_system_backend.dto.TransactionRequest;
 import com.andrade.inventary_management_system_backend.enums.TransactionStatus;
 import com.andrade.inventary_management_system_backend.service.TransactionService;
@@ -50,7 +51,7 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.getAllTransaction(filter, page));
     }
 
-    @GetMapping("/all/data")
+    @GetMapping("/data")
     public ResponseEntity<Response> getAllTransactionByMontAndYear(@RequestParam(required = false) Integer month,
             @RequestParam(required = false) Integer year) {
 
@@ -67,9 +68,8 @@ public class TransactionController {
     }
 
     @PutMapping("/update/{id}")
-
     public ResponseEntity<Response> UpdateTransaction(@PathVariable UUID id,
-            @Valid @RequestBody TransactionStatus status) {
-        return ResponseEntity.ok(transactionService.updateTransactionStatus(id, status));
+            @Valid @RequestBody StatusDto status) {
+        return ResponseEntity.ok(transactionService.updateTransactionStatus(id, status.status()));
     }
 }

@@ -256,12 +256,14 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         @Override
-        public Response updateTransactionStatus(UUID id, TransactionStatus status) {
+        public Response updateTransactionStatus(UUID id, String status) {
 
                 Transaction savedTransaction = transactionRepository.findById(id)
                                 .orElseThrow(() -> new NotFoundException("Transaction was not found "));
 
-                savedTransaction.setTransactionStatus(status);
+                TransactionStatus newStatus = TransactionStatus.valueOf(status.toUpperCase());
+
+                savedTransaction.setTransactionStatus(newStatus);
                 savedTransaction.setUpdateAt(LocalDateTime.now());
                 transactionRepository.save(savedTransaction);
 

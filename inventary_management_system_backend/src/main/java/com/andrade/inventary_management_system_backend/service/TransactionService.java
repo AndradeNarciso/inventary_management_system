@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 
 import com.andrade.inventary_management_system_backend.dto.Response;
 import com.andrade.inventary_management_system_backend.dto.TransactionRequest;
-import com.andrade.inventary_management_system_backend.enums.TransactionStatus;
+
 
 public interface TransactionService {
     Response purchase(TransactionRequest transactionRequest);
@@ -21,6 +21,6 @@ public interface TransactionService {
 
     Response getByMonthAndYear(int month, int year);
 
-    Response updateTransactionStatus(UUID id, TransactionStatus status);
+    Response updateTransactionStatus(UUID id, String status);
 
 }
