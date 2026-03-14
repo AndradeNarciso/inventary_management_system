@@ -42,7 +42,7 @@ public class TransactionDto {
 
     private LocalDateTime updateAt;
 
-    private Product product;
+    private ProductDto product;
 
     private UserDto user;
 

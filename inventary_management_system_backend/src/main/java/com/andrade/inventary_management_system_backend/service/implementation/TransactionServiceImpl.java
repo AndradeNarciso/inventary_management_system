@@ -17,6 +17,7 @@ import com.andrade.inventary_management_system_backend.domain.Product;
 import com.andrade.inventary_management_system_backend.domain.Supplier;
 import com.andrade.inventary_management_system_backend.domain.Transaction;
 import com.andrade.inventary_management_system_backend.domain.User;
+import com.andrade.inventary_management_system_backend.dto.ProductDto;
 import com.andrade.inventary_management_system_backend.dto.Response;
 import com.andrade.inventary_management_system_backend.dto.TransactionDto;
 import com.andrade.inventary_management_system_backend.dto.TransactionRequest;
@@ -170,19 +171,17 @@ public class TransactionServiceImpl implements TransactionService {
                 Specification<Transaction> spec = TransactionFilter.filterByValue(filter);
 
                 Page<Transaction> pagaTransactionByFilterList = transactionRepository.findAll(spec, page);
+                pagaTransactionByFilterList.forEach(t -> {
+                        t.setProduct(null);
+                        t.setUser(null);
+                        t.setSupplier(null);
+
+                });
                 List<TransactionDto> transactionDtoByFilterList = modelMapper.map(
                                 pagaTransactionByFilterList.getContent(),
                                 new TypeToken<List<TransactionDto>>() {
                                 }.getType());
 
-                
-                  transactionDtoByFilterList.forEach(t -> {
-                  t.setProduct(null);
-                  t.setUser(null);
-                  t.setSupplier(null);
-                  
-                  });
-                 
                 return Response.builder()
                                 .status(HttpStatus.OK.value())
                                 .transactionDtos(transactionDtoByFilterList)
@@ -195,14 +194,41 @@ public class TransactionServiceImpl implements TransactionService {
         @Override
         public Response getTransactionById(UUID id) {
 
-                Transaction savedTransaction = transactionRepository.findById(id)
-                                .orElseThrow(() -> new NotFoundException("Transaction was not found "));
+                Transaction t = transactionRepository.findById(id)
+                                .orElseThrow(() -> new NotFoundException("Transaction was not found"));
+
+                ProductDto productDto = null;
+
+                if (t.getProduct() != null) {
+                        Product p = t.getProduct();
+                        productDto = ProductDto.builder()
+                                        .id(p.getId())
+                                        .name(p.getName())
+                                        .sku(p.getSku())
+                                        .price(p.getPrice())
+                                        .quantStock(p.getQuantStock())
+                                        .description(p.getDescription())
+                                        .expireDate(p.getExpireDate())
+                                        .imageUrl(p.getImageUrl())
+                                        .build();
+                }
+
+                TransactionDto transactionDto = TransactionDto.builder()
+                                .id(t.getId())
+                                .totalProduct(t.getTotalProduct())
+                                .totalPrice(t.getTotalPrice())
+                                .transactionType(t.getTransactionType())
+                                .transactionStatus(t.getTransactionStatus())
+                                .description(t.getDescription())
+                                .note(t.getNote())
+                                .createdAt(t.getCreatedAt())
+                                .product(productDto)
+                                .build();
 
                 return Response.builder()
                                 .status(HttpStatus.OK.value())
-                                .transactionDto(modelMapper.map(savedTransaction, TransactionDto.class))
+                                .transactionDto(transactionDto)
                                 .build();
-
         }
 
         @Override

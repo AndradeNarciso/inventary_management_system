@@ -58,8 +58,6 @@ public class ProductServiceImpl implements ProductService {
         try {
             ProductDto productDto = mapper.readValue(productDtoStringValue, ProductDto.class);
 
-           
-
             Category categoryProduct = categoryRepository.findById(productDto.getIdCategory())
                     .orElseThrow(() -> new NotFoundException("Undefined category"));
 
@@ -68,7 +66,7 @@ public class ProductServiceImpl implements ProductService {
 
             }
 
-             String imagePath = saveImage(image);
+            String imagePath = saveImage(image);
 
             Product product = Product.builder()
                     .price(productDto.getPrice())
@@ -158,6 +156,11 @@ public class ProductServiceImpl implements ProductService {
     public Response getAll() {
 
         List<Product> products = productRepository.findAll();
+
+        products.forEach(p -> {
+            p.setCategory(null);
+
+        });
         List<ProductDto> productDtos = modelMapper.map(products, new TypeToken<List<ProductDto>>() {
         }.getType());
 

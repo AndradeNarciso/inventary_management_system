@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Transactional(rollbackOn = Exception.class)
 public class CategoryServiceImpl implements CategoryService {
-        
+
         private final CategoryRepository categoryRepository;
         private final ModelMapper modelMapper;
 
@@ -43,8 +43,12 @@ public class CategoryServiceImpl implements CategoryService {
         @Override
         public Response getAll() {
 
-                List<Category> users = categoryRepository.findAll(Sort.by(Sort.Direction.DESC));
-                List<CategoryDto> categoryDtos = modelMapper.map(users, new TypeToken<List<CategoryDto>>() {
+                List<Category> categories = categoryRepository.findAll(Sort.by(Sort.Direction.DESC));
+                categories.forEach(c -> {
+                        c.setProduct(null);
+                });
+
+                List<CategoryDto> categoryDtos = modelMapper.map(categories, new TypeToken<List<CategoryDto>>() {
                 }.getType());
 
                 return Response.builder()
